@@ -54,6 +54,17 @@ MTK_SGM41513A_CHARGER_SUPPORT := yes
 DEFINES += NO_BAT_INIT
 # ---------------------------------------------------------------------------
 
+# --- NO-UART OBSERVABILITY: progress beacon to expdb -----------------------
+# Our lk never persists its log because stock mt6768 mt_pmic.c omitted the
+# save_pllk_log() call its sibling platforms have (now restored). On a WDT
+# reset the power-off path is never reached, so this flushes the pl+lk log
+# ring to expdb's last-2MB log_store region at platform_init stage boundaries
+# (##F25-BEACON## markers). After a failed boot, dump expdb over BROM with
+# mtkclient and `strings | grep F25-BEACON` to see how far LK got.
+# Remove once the boot is understood.
+DEFINES += CUSTOM_LK_LOG_BEACON
+# ---------------------------------------------------------------------------
+
 MTK_LCM_PHYSICAL_ROTATION = 0
 
 # F25 panel: ST7703 640x960 video-mode LCM driver added in dev/lcm/st7703_dsi_vdo_f25.

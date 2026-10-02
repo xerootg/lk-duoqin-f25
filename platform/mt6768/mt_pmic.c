@@ -42,6 +42,7 @@
 #ifdef MTK_CHARGER_NEW_ARCH
 #include <mtk_charger.h>
 #endif
+#include "log_store_lk.h"   /* save_pllk_log() -- persist pl+lk log to expdb */
 
 //==============================================================================
 // Global variable
@@ -193,6 +194,11 @@ void mt_power_off(void)
 	dprintf(CRITICAL, "mt_power_off new\n");
 
 	primary_display_suspend();
+	/* Persist the pl+lk log ring to expdb BEFORE powering down, so an
+	 * exception/low-battery power-off in LK is recoverable via mtkclient.
+	 * (mt6761/65/71/85 mt_pmic.c do this; stock mt6768 omitted it, which is
+	 * why our lk's power-offs left nothing in expdb.) */
+	save_pllk_log();
 #ifdef MTK_CHARGER_NEW_ARCH
 	charger_enable_wdt(false);
 #endif

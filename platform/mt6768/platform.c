@@ -145,6 +145,28 @@ void platform_uninit(void);
 void config_shared_SRAM_size(void);
 extern int dev_info_nr_cpu(void);
 extern void mt_pll_turn_off(void);
+extern void save_pllk_log(void);
+
+/*
+ * No-UART progress beacon.  Emits a distinctive marker line into the pl+lk log
+ * ring and then SYNCHRONOUSLY flushes that ring to the expdb partition's
+ * last-2MB log_store region (save_pllk_log()).  After a failed boot, dump expdb
+ * over BROM with mtkclient and `strings` it: the furthest "##F25-BEACON##"
+ * marker shows how far platform_init got before a WDT reset / hang.
+ * Safe only AFTER init_storage() (needs eMMC + partition tables registered).
+ * Enable with:  DEFINES += CUSTOM_LK_LOG_BEACON
+ */
+#ifdef CUSTOM_LK_LOG_BEACON
+/* Use printf(), not dprintf(): this build has DEBUGLEVEL=0, which makes dprintf
+ * a no-op (debug.h gates it behind #if DEBUGLEVEL). printf() is unconditional,
+ * so the marker always reaches the log ring before the synchronous flush. */
+#define LK_BEACON(tag) do { \
+	printf("\n##F25-BEACON## " tag "\n"); \
+	save_pllk_log(); \
+} while (0)
+#else
+#define LK_BEACON(tag) do {} while (0)
+#endif
 
 struct mmu_initial_mapping mmu_initial_mappings[] = {
 
@@ -625,6 +647,7 @@ void platform_init(void)
 	dprintf(CRITICAL, "platform_init()\n");
 
 	init_storage();
+	LK_BEACON("after init_storage");
 	lk_vb_init();
 
 	extern void dummy_ap_entry(void)__attribute__((weak)); /* This is empty function for normal load */
@@ -644,6 +667,7 @@ void platform_init(void)
 
 	/* The device tree should be loaded as early as possible. */
 	load_device_tree();
+	LK_BEACON("after load_device_tree");
 
 #if defined(USE_DTB_NO_DWS) && !defined(MACH_FPGA)
 	mt_gpio_set_default();
@@ -694,8 +718,11 @@ void platform_init(void)
 	PROFILING_END();
 #endif /* MACH_FPGA_NO_DISPLAY */
 
+	LK_BEACON("after disp+video init");
+
 	/*for kpd pmic mode setting*/
 	set_kpd_pmic_mode();
+	LK_BEACON("before boot_mode_select (WDT still armed)");
 
 #ifndef MACH_FPGA
 	PROFILING_START("boot mode select");
