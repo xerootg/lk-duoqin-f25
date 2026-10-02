@@ -85,6 +85,11 @@ SPM_FW_USE_PARTITION = yes
 BOOT_LOGO := hd720
 
 DEBUG := 2
+# Re-enable real logging: a prior commit hardcoded DEBUGLEVEL 0 in debug.h, which
+# makes dprintf() a no-op (so our lk barely logs). debug.h is now #ifndef-guarded;
+# set DEBUGLEVEL=2 (SPEW) here so the full boot trace reaches the log ring and is
+# persisted to expdb (via the beacon / mt_power_off save_pllk_log flush).
+DEFINES += DEBUGLEVEL=2
 DEFINES += WITH_DEBUG_UART=1
 CUSTOM_LK_USB_UNIQUE_SERIAL = no
 MTK_TINYSYS_SCP_SUPPORT = yes

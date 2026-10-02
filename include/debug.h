@@ -33,7 +33,9 @@
 extern "C" {
 #endif
 
+#ifndef DEBUGLEVEL
 #define DEBUGLEVEL 0
+#endif
 
 /* debug levels */
 #define CRITICAL 0
