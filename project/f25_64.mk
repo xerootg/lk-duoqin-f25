@@ -38,6 +38,22 @@ MTK_CHARGER_INTERFACE := yes
 MTK_MT6370_PMU_CHARGER_SUPPORT := no
 MTK_MT6370_PMU_BLED_SUPPORT := no
 MTK_SGM41513A_CHARGER_SUPPORT := yes
+
+# --- BRING-UP SAFETY: skip LK battery/charger init -------------------------
+# platform.c battery init (both the MTK_CHARGER_NEW_ARCH=yes path and the
+# legacy mt65xx_bat_init() path this project uses) contains several
+# mt_power_off() guards keyed on battery-voltage / charger / PMIC BATON reads
+# (mt_battery.c:542/567/578; common/power/mtk_charger.c:335/386/406/576/661).
+# These were VALIDATED on stock (stock built MTK_CHARGER_NEW_ARCH=yes) but the
+# F25's actual charger IC is not in any LK probe list (the stock PRELOADER log
+# probes eta6937, not SGM41513A), so an unvalidated read here can power the
+# device off and look like a boot-loop that leaves nothing in expdb.
+# LK does not need to charge in order to hand off to the kernel; the kernel
+# re-inits the charger. Skip battery init for the first-boot milestone, then
+# remove this once the charger IC identity + voltage/BATON reads are confirmed.
+DEFINES += NO_BAT_INIT
+# ---------------------------------------------------------------------------
+
 MTK_LCM_PHYSICAL_ROTATION = 0
 
 # F25 panel: ST7703 640x960 video-mode LCM driver added in dev/lcm/st7703_dsi_vdo_f25.
