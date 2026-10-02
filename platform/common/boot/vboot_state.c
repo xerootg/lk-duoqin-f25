@@ -180,7 +180,18 @@ int show_warning(const char *img_name)
 	int ret = 0;
 	switch (g_boot_state) {
 	case BOOT_STATE_ORANGE:
+#ifdef CUSTOM_LK_SKIP_UNLOCK_WARNING
+		/* Owner-unlocked device: skip the on-screen orange "device is unlocked"
+		 * warning. This is a local display-only convenience. (orange_state_warning()
+		 * in this fork already has its 5s mdelay commented out, so there is no boot
+		 * delay to remove -- only the cosmetic nag print is suppressed.) The boot
+		 * state remains BOOT_STATE_ORANGE, so set_boot_state_to_cmdline() still
+		 * reports androidboot.verifiedbootstate=orange to the OS and the TEE Root of
+		 * Trust still receives the true unlocked state. */
+		ret = 0;
+#else
 		ret = orange_state_warning();
+#endif
 		break;
 	case BOOT_STATE_YELLOW:
 #ifdef MTK_SECURITY_YELLOW_STATE_SUPPORT

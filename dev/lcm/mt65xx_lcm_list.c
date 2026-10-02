@@ -56,8 +56,13 @@ extern LCM_DRIVER hct_rm68200_dsi_vdo_hd_cpt;
 extern LCM_DRIVER hct_rm68200_dsi_vdo_hd_tm_50_xld;
 extern LCM_DRIVER hct_nt35521s_dsi_vdo_hd_boe_50_xld;
 extern LCM_DRIVER hct_hx8394d_dsi_vdo_hd_cmi;
+extern LCM_DRIVER st7703_dsi_vdo_f25;
 
 LCM_DRIVER *lcm_driver_list[] = {
+#if defined(ST7703_DSI_VDO_F25)
+       &st7703_dsi_vdo_f25,
+#endif
+
 #if defined(HCT_OTM1285A_DSI_VDO_HD_BOE)
        &hct_otm1285a_dsi_vdo_hd_boe,
 #endif
