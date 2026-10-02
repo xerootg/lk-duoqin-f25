@@ -38,6 +38,7 @@
 #include <platform/rt9467.h>
 #include <platform/rt9468.h>
 #include <platform/mt6370_pmu_charger.h>
+#include <platform/sgm41513a.h>
 #include <printf.h>
 #include <string.h>
 
@@ -46,10 +47,21 @@
 
 static struct mtk_charger_info *mchr_info_list[MAX_MCHR_INFO_SIZE];
 static int (*mtk_charger_init_list[])(void) = {
+#ifdef MTK_RT9466_SUPPORT
 	rt9466_probe,
+#endif
+#ifdef MTK_RT9467_SUPPORT
 	rt9467_probe,
+#endif
+#ifdef MTK_RT9468_SUPPORT
 	rt9468_probe,
+#endif
+#ifdef MTK_MT6370_PMU_CHARGER_SUPPORT
 	mt6370_chg_probe,
+#endif
+#ifdef MTK_SGM41513A_CHARGER_SUPPORT
+	sgm41513a_chg_probe,
+#endif
 };
 
 int mtk_charger_init(void)

@@ -26,11 +26,18 @@ MTK_KERNEL_POWER_OFF_CHARGING = yes
 MTK_SMI_SUPPORT = yes
 DEFINES += MTK_NEW_COMBO_EMMC_SUPPORT
 DEFINES += MTK_GPT_SCHEME_SUPPORT
-MTK_CHARGER_NEW_ARCH := yes
+# In this tree rules.mk gates ALL charger drivers + mt6battery + mtk_charger_intf
+# under `ifneq(MTK_CHARGER_NEW_ARCH, yes)`, with no else branch. So NEW_ARCH=yes
+# (the k68v1_64 default) compiles ZERO charger code. Set it to no so the SGM41513A
+# charger, battery, and the charger interface are actually built.
+MTK_CHARGER_NEW_ARCH := no
 MTK_PUMP_EXPRESS_PLUS_SUPPORT := no
 MTK_CHARGER_INTERFACE := yes
-MTK_MT6370_PMU_CHARGER_SUPPORT := yes
-MTK_MT6370_PMU_BLED_SUPPORT := yes
+# F25 charger is an SGM41513A on I2C7 @ 0x6B (confirmed from the stock LK boot log),
+# not the MT6370. Backlight is native MTK PWM (per HARDWARE.md), not MT6370 BLED.
+MTK_MT6370_PMU_CHARGER_SUPPORT := no
+MTK_MT6370_PMU_BLED_SUPPORT := no
+MTK_SGM41513A_CHARGER_SUPPORT := yes
 MTK_LCM_PHYSICAL_ROTATION = 0
 
 # F25 panel: ST7703 640x960 video-mode LCM driver added in dev/lcm/st7703_dsi_vdo_f25.
@@ -56,7 +63,8 @@ CUSTOM_LK_USB_UNIQUE_SERIAL = no
 MTK_TINYSYS_SCP_SUPPORT = yes
 MTK_PROTOCOL1_RAT_CONFIG = C/Lf/Lt/W/T/G
 MTK_GOOGLE_TRUSTY_SUPPORT = no
-DEFINES += MTK_MT6370_PMU
+# MT6370 PMU disabled on F25 (charger is SGM41513A; backlight is native PWM).
+# DEFINES += MTK_MT6370_PMU
 DEVELOP_STAGE = SB
 MTK_TINYSYS_SSPM_SUPPORT = yes
 MTK_VPU_SUPPORT = no
